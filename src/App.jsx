@@ -1,97 +1,75 @@
+import './App.scss';
 import {useState} from "react";
-import "./App.scss";
+import {getId} from "./helpers/helpers.js";
 
 function App() {
-
-    const [value, setValue] = useState('');
+    const [todo, setTodo] = useState('');
     const [todos, setTodos] = useState([]);
-    const [filters, setFilters] = useState('all')
 
-
-    function getNewId() {
-        if (todos.length === 0) {
-            return 1;
+    const handleAddTodo = (evt) => {
+        if (evt.key === "Enter" && todo.trim().length >= 3) {
+            setTodos([{
+                id: getId(todos),
+                status: 'in progress',
+                title: todo
+            }, ...todos]);
+            setTodo('');
         }
-        return Math.max(...todos.map((todo) => todo.id)) + 1;
-    }
+    };
 
-    // todos = [{id: 1, name: 'a', status: 'active'}, {id: 2, name: 'b', status: 'active'}]
-    // map => [1, 2]
-    // ... => 1, 2
-    // Math.max(1, 2) => 2
-    // + 1 => 3
-
-    function handleValue(event) {
-        setValue(event.target.value);
-    }
-
-    function handleAddTodo(event) {
-        if (event.key === 'Enter') {
-            setTodos([...todos, {
-                id: getNewId(),
-                name: value,
-                status: 'active',
-
-            }]);
-            setValue('');
-        }
-    }
-
-
-    function handleChangeStatus(todo) {
-        todo.status = todo.status === 'active' ? 'done' : "active";
+    const handleChangeStatus = (task) => {
+        task.status = task.status === 'in progress' ? 'done' : 'in progress';
         setTodos([...todos]);
-    }
+    };
 
+    const handleDeleteTodo = (todo) => {
+        setTodos(todos.filter((task) => task !== todo));
+    };
 
-    function handleDeleteTodo(task) {
-        setTodos(todos.filter((todo)=> todo !== task));
-
-    }
-    function handleDeleteAllDoneTodos() {
-        setTodos(todos.filter((todo) => todo.status !=='done'))
-
-    }
+    const handleDeleteDoneTasks = () => {
+        setTodos(todos.filter((task) => task.status !== 'done'));
+    };
 
     return (
-        <div>
+        <div className="todoapp">
             <h1>todos</h1>
-            <input
-                type="text"
-                value={value}
-                onChange={handleValue} // dodanie zdarzenia na dana funkcje
-                onKeyUp={handleAddTodo}
-            />
-            <ul className="todos">
-                {todos
-                    .filter((todo) => filters === 'all' ? true: filters === todos.status)
-                    .map((todo) => (
-                    <li className="todo" key={todo.id}>
-                        <span
-                            className={todo.status === 'active' ? 'status'  : 'status done'}
-                              onClick={() => handleChangeStatus(todo)}
-
-                        ></span>
-                        <span>{todo.name}</span>
+            <section className="todos">
+                <input
+                    type="text"
+                    className="todo-input"
+                    value={todo}
+                    onChange={(event) => setTodo(event.target.value)}
+                    onKeyUp={handleAddTodo}
+                />
+                <ul className="todos-list">
+                    {todos.map((task) => (
+                        <li
+                            className="todos-item"
+                            key={task.id}
+                        >
+                            <span
+                                className={task.status === 'in progress' ? 'status' : 'status done'}
+                                onClick={() => handleChangeStatus(task)}
+                            ></span>
+                            <span>{task.title}</span>
+                            <button
+                                className="btn-delete"
+                                onClick={() => handleDeleteTodo(task)}
+                            >delete
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+                <div className="box">
+                    <p className="counter">{todos.filter((task) => task.status === 'in progress').length} items left</p>
+                    {todos.some((task) => task.status === 'done' ) && (
                         <button
-                            className="btn-delete"
-                                onClick={()=>handleDeleteTodo(todo)}
-                        >Delete
-                        </button>
-                    </li>
-                ))}
-            </ul>
-            <p> {todos.filter((todo) => todo.status === 'active').length} items left </p>
-
-            <div>
-                <button className={filters === 'all' ? 'current': ''} onClick={() => setFilters('all')}>ALl</button>
-                <button className={filters === 'active' ? 'current': ''} onClick={() => setFilters('active')}>Active</button>
-                <button className={filters === 'done' ? 'current': ''} onClick={() => setFilters('done')}>Done</button>
-            </div>
-            {!!todos.filter((todo) => todo.status === 'done').length && (
-                <button onClick={handleDeleteAllDoneTodos}> Clear completed </button>
-            )}
-
+                            className="btn"
+                            onClick={handleDeleteDoneTasks}
+                        >Clear completed</button>
+                    )}
+                </div>
+            </section>
         </div>
     );
 }
