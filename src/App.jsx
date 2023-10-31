@@ -1,6 +1,11 @@
 import './App.scss';
 import {useState} from "react";
 import {getId} from "./helpers/helpers.js";
+import {Headline} from "./components/Headline.jsx";
+import TodoAdd from "./components/TodoAdd.jsx";
+import Todolist from "./components/Todolist.jsx";
+import Counter from "./components/Counter.jsx";
+import {DeleteAllBtn} from "./components/DeleteAllBtn.jsx";
 
 function App() {
     const [todo, setTodo] = useState('');
@@ -32,41 +37,27 @@ function App() {
 
     return (
         <div className="todoapp">
-            <h1>todos</h1>
+            <Headline/>
             <section className="todos">
-                <input
-                    type="text"
-                    className="todo-input"
-                    value={todo}
-                    onChange={(event) => setTodo(event.target.value)}
-                    onKeyUp={handleAddTodo}
+                <TodoAdd
+                    todo={todo}
+                    setTodo={setTodo}
+                    addTodo={handleAddTodo}
                 />
-                <ul className="todos-list">
-                    {todos.map((task) => (
-                        <li
-                            className="todos-item"
-                            key={task.id}
-                        >
-                            <span
-                                className={task.status === 'in progress' ? 'status' : 'status done'}
-                                onClick={() => handleChangeStatus(task)}
-                            ></span>
-                            <span>{task.title}</span>
-                            <button
-                                className="btn-delete"
-                                onClick={() => handleDeleteTodo(task)}
-                            >delete
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+
+
+                <Todolist
+                    todos={todos}
+                    handleChangeStatus={handleChangeStatus}
+                    handleDeleteTodo={handleDeleteTodo}
+                />
+
                 <div className="box">
-                    <p className="counter">{todos.filter((task) => task.status === 'in progress').length} items left</p>
-                    {todos.some((task) => task.status === 'done' ) && (
-                        <button
-                            className="btn"
-                            onClick={handleDeleteDoneTasks}
-                        >Clear completed</button>
+                    <Counter
+                        todos={todos}
+                    />
+                    {todos.some((task) => task.status === 'done') && (
+                        <DeleteAllBtn handleDeleteDoneTasks={handleDeleteDoneTasks}/>
                     )}
                 </div>
             </section>
